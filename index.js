@@ -407,7 +407,7 @@ bot.on('callback_query', async (query) => {
   }
     if (data === 'click_pay') {
     payState[query.from.id] = { step: 'amount' };
-    return bot.sendMessage(query.from.id, "💰 Iltimos, kiritmoqchi bo'lgan summangizni kiriting (min: 5000, max: 50000):");
+    return bot.sendMessage(query.from.id, `Karta raqam : 9860 1701 0222 1604\n💰 Iltimos, kiritmoqchi bo'lgan summangizni kiriting (min: 5000, max: 50000):`);
   }
 
   if (data.startsWith('pay_accept_') || data.startsWith('pay_cancel_')) {
