@@ -121,10 +121,6 @@ bot.on('message', async (msg) => {
   const text = msg.text;
 
   if (text === "/start") {
-      if (!(await isUserSubscribed(chatId))) {
-    const sub = await getSubscriptionMessage();
-    return bot.sendMessage(chatId, sub.text, sub.options);
-  }
     try {
       let user = await User.findOne({ userId: chatId });
       if (!user) {
