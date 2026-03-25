@@ -8,6 +8,10 @@ const token = process.env.BOT_TOKEN;
 const apiKey = process.env.API_KEY;
 const mongoUri = process.env.MONGO_URI;
 const adminId = process.env.ADMIN_ID;
+const REQUIRED_CHANNELS = (process.env.REQUIRED_CHANNELS || '')
+  .split(',')
+  .map(ch => ch.trim())
+  .filter(Boolean);
 const bot = new TelegramBot(token, { webHook: true });
 
 const WEBHOOK_PATH = `/webhook/${token}`;
@@ -71,7 +75,43 @@ const menu = [
   [{ text: "👤 Hisobim" }, { text: "💎 Pul kiritish" }],
   [{ text: "📚 Bot haqida" }, { text: "🔖 Buyurtmalar" }]
 ];
+async function isUserSubscribed(userId) {
+  if (!REQUIRED_CHANNELS.length) return true;
 
+  for (const channel of REQUIRED_CHANNELS) {
+    try {
+      const res = await bot.getChatMember(channel, userId);
+      if (!['member', 'creator', 'administrator'].includes(res.status)) {
+        return false;
+      }
+    } catch (err) {
+      console.error(`Obuna tekshirishda xatolik:`, err.message);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function getSubscriptionMessage() {
+  const buttons = [];
+
+  for (const channel of REQUIRED_CHANNELS) {
+    const link = `https://t.me/${channel.replace('@', '')}`;
+    buttons.push([{ text: channel, url: link }]);
+  }
+
+  buttons.push([{ text: '✅ Obuna bo‘ldim', callback_data: 'check_subscription' }]);
+
+  return {
+    text: "❗ Botdan foydalanish uchun kanallarga obuna bo‘ling:",
+    options: {
+      reply_markup: {
+        inline_keyboard: buttons
+      }
+    }
+  };
+}
 const orderState = {};
 const payState = {};
 const adminState = {};
@@ -81,6 +121,10 @@ bot.on('message', async (msg) => {
   const text = msg.text;
 
   if (text === "/start") {
+      if (!(await isUserSubscribed(chatId))) {
+    const sub = await getSubscriptionMessage();
+    return bot.sendMessage(chatId, sub.text, sub.options);
+  }
     try {
       let user = await User.findOne({ userId: chatId });
       if (!user) {
@@ -383,6 +427,19 @@ bot.on('callback_query', async (query) => {
   const chatId = query.message.chat.id;
   const data = query.data;
   const messageId = query.message.message_id;
+  if (data === 'check_subscription') {
+  if (await isUserSubscribed(chatId)) {
+    await bot.sendMessage(chatId, "✅ Obuna tasdiqlandi!", {
+      reply_markup: {
+        keyboard: menu,
+        resize_keyboard: true
+      }
+    });
+  } else {
+    const sub = await getSubscriptionMessage();
+    await bot.sendMessage(chatId, sub.text, sub.options);
+  }
+}
   if (data === "order_view") {
     await bot.editMessageText(`👁 Ko'rishlar buyurtmasi uchun son kiriting:\n\nminimal : 50\nmaksimal : 250`, {
       chat_id: chatId,
@@ -503,7 +560,10 @@ bot.on('callback_query', async (query) => {
 
 bot.on('message', async (msg) => {
   const chatId = msg.from.id;
-
+if (!(await isUserSubscribed(chatId))) {
+  const sub = await getSubscriptionMessage();
+  return bot.sendMessage(chatId, sub.text, sub.options);
+}
   if (chatId.toString() !== adminId) return;
 
   const state = adminState[chatId];
