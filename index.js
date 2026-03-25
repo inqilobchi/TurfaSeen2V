@@ -94,7 +94,7 @@ bot.on('message', async (msg) => {
     await bot.sendPhoto(chatId,
       "https://img.freepik.com/premium-photo/concept-social-media-marketing-smm-abstract-holographic-image-with-icons_102583-6813.jpg",
       {
-        caption: `<b>Assalomu alaykum <a href="tg://user?id=${chatId}">${name}</a>!</b>\n\nBot orqali obunachi, ko‘rish, reaksiya, izoh va boshqa xizmatlarga buyurtma bera olasiz ✅\n\n<blockquote><b>📍 Hamkor: @TurfaSeenBot</b></blockquote>`,
+        caption: `<b>Assalomu alaykum <a href="tg://user?id=${chatId}">${name}</a>!</b>\n\nBot orqali obunachi, ko‘rish, reaksiya, izoh va boshqa xizmatlarga buyurtma bera olasiz ✅`,
         parse_mode: 'HTML',
         reply_markup: {
           keyboard: menu,
@@ -407,7 +407,7 @@ bot.on('callback_query', async (query) => {
   }
     if (data === 'click_pay') {
     payState[query.from.id] = { step: 'amount' };
-    return bot.sendMessage(query.from.id, `Karta raqam : 9860 1701 0222 1604\n💰 Iltimos, kiritmoqchi bo'lgan summangizni kiriting (min: 5000, max: 50000):`);
+    return bot.sendMessage(query.from.id, `Karta raqam : 9860120154520189\n💰 Iltimos, kiritmoqchi bo'lgan summangizni kiriting (min: 5000, max: 50000):`);
   }
 
   if (data.startsWith('pay_accept_') || data.startsWith('pay_cancel_')) {
